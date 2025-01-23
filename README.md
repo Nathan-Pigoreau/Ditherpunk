@@ -261,12 +261,6 @@ cargo run -- --input img/IUT.jpg --output img/output.png diffusion_erreur_floyd_
     Pour représenter la matrice de Bayer, nous pouvons utiliser un type de données en deux dimensions, tel qu'un vecteur de vecteurs (`Vec<Vec<f64>>`) en Rust. Cela permet de stocker les valeurs de la matrice de manière flexible et dynamique.
     Pour créer une matrice de Bayer d'ordre arbitraire, nous pouvons utiliser une fonction récursive qui génère la matrice en suivant la définition récursive donnée.
 
-- Question 15
-
-    Implémenter le tramage par matrice de Bayer.
-
-    Réponse : Utiliser la fonction `monochrome_matrice_bayer`.
-
 #### 6 Diffusion d'erreur
 
 - Question 17
