@@ -65,12 +65,12 @@ Vous serez invité à entrer deux couleurs pour le seuillage.
 Convertit l'image en utilisant une palette contenant un nombre limité de couleurs.
 
 ```sh
-cargo run -- --input <chemin/vers/image> --output [output] palette --n_couleurs <nombre_de_couleurs>
+cargo run -- --input <chemin/vers/image> --output [output] palette --n-couleurs <nombre_de_couleurs>
 ```
 
-- `--n_couleurs` : Le nombre de couleurs à utiliser (maximum 8).
+- `--n-couleurs` : Le nombre de couleurs à utiliser (maximum 8).
 
-Si `n_couleurs` est 8, les couleurs utilisées seront : NOIR, BLANC, ROUGE, VERT, BLEU, JAUNE, CYAN, MAGENTA. Sinon, vous serez invité à entrer les couleurs manuellement.
+Si `n-couleurs` est 8, les couleurs utilisées seront : NOIR, BLANC, ROUGE, VERT, BLEU, JAUNE, CYAN, MAGENTA. Sinon, vous serez invité à entrer les couleurs manuellement.
 
 #### Tramage Aléatoire
 
@@ -133,10 +133,10 @@ cargo run -- --input <chemin/vers/image> --output [output] diffusion_erreur
 Convertit l'image en utilisant la diffusion d'erreur et une palette de couleurs.
 
 ```sh
-cargo run -- --input <chemin/vers/image> --output [output] diffusion_erreur_palette --n_couleurs <nombre_de_couleurs>
+cargo run -- --input <chemin/vers/image> --output [output] diffusion_erreur_palette --n-couleurs <nombre_de_couleurs>
 ```
 
-- `--n_couleurs` : Le nombre de couleurs à utiliser (maximum 8).
+- `--n-couleurs` : Le nombre de couleurs à utiliser (maximum 8).
 
 #### Diffusion d'Erreur Floyd-Steinberg
 
@@ -157,7 +157,7 @@ cargo run -- --input img/IUT.jpg --output img/output.png seuil
 ### Exemple 2 : Palette de 4 couleurs
 
 ```sh
-cargo run -- --input img/IUT.jpg --output img/output.png palette --n_couleurs 4
+cargo run -- --input img/IUT.jpg --output img/output.png palette --n-couleurs 4
 ```
 
 ### Exemple 3 : Tramage aléatoire
@@ -199,7 +199,7 @@ cargo run -- --input img/IUT.jpg --output img/output.png diffusion_erreur
 ### Exemple 9 : Diffusion d'Erreur avec Palette
 
 ```sh
-cargo run -- --input img/IUT.jpg --output img/output.png diffusion_erreur_palette --n_couleurs 4
+cargo run -- --input img/IUT.jpg --output img/output.png diffusion_erreur_palette --n-couleurs 4
 ```
 
 ### Exemple 10 : Diffusion d'Erreur Floyd-Steinberg
@@ -209,6 +209,82 @@ cargo run -- --input img/IUT.jpg --output img/output.png diffusion_erreur_floyd_
 ```
 
 ### Questions de cours
+
+#### 1 La bibliothèque image
+
+- Question 1
+
+    Pour créer un nouveau projet Cargo avec une dépendance sur la bibliothèque `image` version 0.24, utilisez la commande suivante :
+    ```sh
+    cargo new ditherpunk
+    cd ditherpunk
+    cargo add image@0.24
+    ```
+
+- Question 2
+
+    Pour ouvrir une image depuis un fichier, on utilise
+    ```rust
+    ImageReader::open("myimage.png")?.decode()?;
+    ```
+    On obtient un `DynamicImage`, à quoi correspond ce type? Comment obtenir une image en mode `rgb8` à partir de ce `DynamicImage`?
+
+    Le type `DynamicImage` est une enum de la bibliothèque `image` de Rust qui peut représenter différentes formes d'images (grayscale, RGB, RGBA, etc.). Il permet de manipuler des images de manière générique sans se soucier du format spécifique.
+
+    Pour obtenir une image en mode `rgb8` à partir de ce `DynamicImage`, vous pouvez utiliser la méthode `to_rgb8()` comme suit :
+    ```rust
+    let img = ImageReader::open("myimage.png")?.decode()?;
+    let rgb_image = img.to_rgb8();
+    ```
+    Cela convertira l'image en un format RGB 8 bits par canal.
+
+- Question 3
+
+    Pour sauvegarder l'image obtenue au format PNG, vous pouvez utiliser la méthode `save` de la bibliothèque `image` comme suit :
+
+    ```rust
+    rgb_image.save("output.png")?;
+    ```
+
+    Si l'image de départ avait un canal alpha (transparence), celui-ci sera ignoré lors de la conversion en `rgb8`, car ce format ne supporte pas la transparence. En conséquence, l'image sauvegardée au format PNG n'aura pas de canal alpha et les zones transparentes de l'image originale seront converties en noir.
+
+#### 2 Passage en monochrome par seuillage
+
+- Question 6
+
+   Pour récupérer la luminosité d'un pixel, utilisez la formule pondérée suivante, qui reflète la sensibilité de l'œil humain aux    différentes couleurs :
+   
+   ```markdown
+   Luminosité = 0.299 * R + 0.587 * G + 0.114 * B
+   ```
+   
+   Étapes :
+   1. Extraire les valeurs R, G, et B du pixel.
+   2. Appliquer la formule pour obtenir la luminosité.
+   
+   Cette méthode permet de convertir un pixel en couleur en une valeur de luminosité, utile pour des applications comme le passage en monochrome par seuillage.
+
+
+#### 3 Passage à une palette
+
+- Question 9
+
+    Pour calculer la distance entre deux couleurs, nous utilisons la distance euclidienne dans l'espace des couleurs RGB. La formule de calcul est la suivante :
+
+    ```rust
+    pub fn distance_couleurs(couleur1: image::Rgb<u8>, couleur2: image::Rgb<u8>) -> f32 {
+        let r = couleur1[0] as f32 - couleur2[0] as f32;
+        let g = couleur1[1] as f32 - couleur2[1] as f32;
+        let b = couleur1[2] as f32 - couleur2[2] as f32;
+        (r * r + g * g + b * b).sqrt()
+    }
+    ```
+
+    Cette méthode calcule la distance en prenant la racine carrée de la somme des carrés des différences des composantes rouge, verte et bleue des deux couleurs. Cela permet de mesurer à quel point deux couleurs sont similaires ou différentes.
+
+- Question 11
+
+    Si la palette est vide, le message "Aucune couleur sélectionnée, l'image reste inchangée" sera affiché. Cela signifie que l'image d'entrée ne subira aucune transformation et sera sauvegardée telle quelle. Ce choix a été fait pour éviter des erreurs ou des comportements imprévisibles lors de l'application des traitements. En l'absence de couleurs définies dans la palette, il est logique de conserver l'image originale sans modification.
 
 #### 5 Utilisation de la matrice de Bayer comme trame
 
